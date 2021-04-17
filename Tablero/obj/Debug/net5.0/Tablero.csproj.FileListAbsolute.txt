@@ -13,3 +13,4 @@ C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.dll
 C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\ref\Tablero.dll
 C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.pdb
 C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.genruntimeconfig.cache
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.csprojAssemblyReference.cache

@@ -66,11 +66,11 @@ namespace Tablero
 
         protected void printPiece(int x, int y)
         {
-            Piece current = this[x, y];
-            if (current == null)
-                Write("  ");
+            if (!isPiece(x, y))
+                Write("__");
             else
             {
+                Piece current = this[x, y];
                 if (current.team == 1) //White
                     ForegroundColor = ConsoleColor.DarkYellow;
                 else //Black
@@ -193,33 +193,55 @@ namespace Tablero
 
             foreach (Piece b in black)
                     placePiece(b);
+
+            Piece aux = new Piece(2, 2, 7, 4);
+            placePiece(aux);
         }
 
-        public bool algebraicNotation(string expression)
+        public string algebraicNotation(string expression)
         {
             int x, y, letter, number;
+            expression.Replace(' ', '\0');
             try {
-                x = Convert.ToInt32(expression[0].ToString());
+                x = (int)Enum.Parse(typeof(Letters), expression[0].ToString().ToUpper());
                 y = Convert.ToInt32(expression[1].ToString());
-                letter = Convert.ToInt32(expression[2].ToString());
+                letter = (int)Enum.Parse(typeof(Letters), expression[2].ToString().ToUpper());
                 number = Convert.ToInt32(expression[3].ToString());
             }
             catch {
-                return false;
+                return "ERROR: problem parsing instructions";
             }
 
-            try {
-                return move(this[x, y], letter, number);
+            if (!isPiece(x, y))
+                return "ERROR: no piece";
+
+            int msg = step(this[x, y], letter, number);
+            if (msg == 0)
+            {
+                return "ERROR: problem moving piece";
             }
-            catch {
-                return false;
+            else if (msg == 1)
+            {
+                string message = ((Pieces)this[letter, number].type).ToString();
+                message += (((Letters)letter).ToString()).ToLower();
+                message += number;
+                return message;
             }
+            else if (msg == 2)
+            {
+                string message = ((Pieces)this[letter, number].type).ToString();
+                message += ":" + (((Letters)letter).ToString()).ToLower();
+                message += number;
+                return message;
+            }
+            else
+                return "ERROR: unknown error";
         }
 
-        private bool move(Piece piece, int x, int y)
+        private int step(Piece piece, int x, int y) //0 is error, 1 is move, 2 is kill
         {
             if (!isInBounds(x, y))
-                return false;
+                return 0;
             switch(piece.type)
             {
                 case 1: //Pawn
@@ -228,242 +250,178 @@ namespace Tablero
                         if (Math.Abs(x - piece.x) == 1)    //Diagonal
                         {
                             if (enemyExists(piece, x, y))    //Can kill
-                            {
-                                piece.setDir(x, y);    //Kills
-                                placePiece(piece);
-                            }
+                                return kill(piece, x, y);    //Kills
                             else
-                                return false;
+                                return 0;
                         }
                         else if (x == piece.x)    //Straightforward
                         {
                             if (!isPiece(x, y))    //It's empty
-                            {
-                                this[piece.x, piece.y] = null;    //Move
-                                piece.setDir(x, y);
-                                placePiece(piece);
-                            }
+                                return move(piece, x, y);    //Move
                             else
-                                return false;
+                                return 0;
                                 
                         }
                         else
-                            return false;
+                            return 0;
                     }
                     else if (starterPawnPos(piece.x, piece.y, x, y))
                     {
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else
-                            return false;
+                            return 0;
                     }
                     else
-                        return false;                    
-                    break;
+                        return 0;                    
                 case 2: //Rook
                     if (horizontalPos(piece.x, piece.y, x, y))    //Horizontal
                     {
                         int sum = (x - piece.x) / Math.Abs(x - piece.x);
-                        for (int i = piece.x; i != x; i += sum)
-                        {
+                        for (int i = piece.x + sum; i != x; i += sum)
                             if (isPiece(i, y))    //Blocking the path
-                                return false;
-                        }
+                                return 0;
 
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else
-                            return false;    //Friendly fire!
+                            return 0;    //Friendly fire!                            
                     }
-                    else if (verticalPos(piece.x, piece.y, x, y))              //Vertical
+                    else if (verticalPos(piece.x, piece.y, x, y))    //Vertical
                     {
                         int sum = (y - piece.y) / Math.Abs(y - piece.y);
                         for (int i = piece.y; i != y; i += sum)
-                        {
                             if (isPiece(x, i))    //Blocking the path
-                                return false;
-                        }
+                                return 0;
 
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else
-                            return false;    //Friendly fire!
+                            return 0;    //Friendly fire!
                     }
                     else
-                        return false;
-                    break;
+                        return 0;
                 case 3: //Knight
                     if (knightPos(piece.x, piece.y, x, y))    //In position
                     {
                         if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else if(!isPiece(x, y))
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else
-                            return false;
+                            return 0;
                     }
                     else
-                        return false;
-                    break;
+                        return 0;
                 case 4: //Bishop
                     if (bishopPos(piece.x, piece.y, x, y))    //In position
                     {
-                        int sumx = (x - piece.x) / Math.Abs(x - piece.x);
-                        int sumy = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.x; i != x; i += sumx)
-                        {
-                            for (int j = piece.y; j != y; j += sumy)
-                            {
-                                if (isPiece(i, j))    //Blocking the path
-                                    return false;
-                            }
+                        int multx = (x - piece.x) / Math.Abs(x - piece.x);
+                        int multy = (y - piece.y) / Math.Abs(y - piece.y);
+                        for (int i = piece.x; i != x; i++)
+                            if (isPiece(multx*i, multy*i))    //Blocking the path
+                                    return 0;
 
                             if (!isPiece(x, y))    //It's empty
-                            {
-                                this[piece.x, piece.y] = null;    //Move
-                                piece.setDir(x, y);
-                                placePiece(piece);
-                            }
+                                return move(piece, x, y);    //Move
                             else if (enemyExists(piece, x, y))    //Target acquired!
-                            {
-                                piece.setDir(x, y);    //Kills
-                                placePiece(piece);
-                            }
+                                return kill(piece, x, y);    //Kills
                             else
-                                return false;    //Friendly fire!
-                        }
+                                return 0;    //Friendly fire!
                     }
                     else
-                        return false;
-                    break;
+                        return 0;
                 case 5: //Queen (copied the rook's + bishop's code)
                     if (horizontalPos(piece.x, piece.y, x, y))    //Horizontal
                     {
                         int sum = (x - piece.x) / Math.Abs(x - piece.x);
                         for (int i = piece.x; i != x; i += sum)
-                        {
                             if (isPiece(i, y))    //Blocking the path
-                                return false;
-                        }
+                                return 0;
 
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else
-                            return false;    //Friendly fire!
+                            return 0;    //Friendly fire!
                     }
-                    else if (verticalPos(piece.x, piece.y, x, y))              //Vertical
+                    else if (verticalPos(piece.x, piece.y, x, y))    //Vertical
                     {
                         int sum = (y - piece.y) / Math.Abs(y - piece.y);
                         for (int i = piece.y; i != y; i += sum)
-                        {
                             if (isPiece(x, i))    //Blocking the path
-                                return false;
-                        }
+                                return 0;
 
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else
-                            return false;    //Friendly fire!
+                            return 0;    //Friendly fire!
                     }
                     else if (bishopPos(piece.x, piece.y, x, y))    //In position
                     {
-                        int sumx = (x - piece.x) / Math.Abs(x - piece.x);
-                        int sumy = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.x; i != x; i += sumx)
-                        {
-                            for (int j = piece.y; j != y; j += sumy)
-                            {
-                                if (isPiece(i, j))    //Blocking the path
-                                    return false;
-                            }
+                        int multx = (x - piece.x) / Math.Abs(x - piece.x);
+                        int multy = (y - piece.y) / Math.Abs(y - piece.y);
+                        for (int i = piece.x; i != x; i++)
+                            if (isPiece(multx * i, multy * i))    //Blocking the path
+                                return 0;
 
-                            if (!isPiece(x, y))    //It's empty
-                            {
-                                this[piece.x, piece.y] = null;    //Move
-                                piece.setDir(x, y);
-                                placePiece(piece);
-                            }
-                            else if (enemyExists(piece, x, y))    //Target acquired!
-                            {
-                                piece.setDir(x, y);    //Kills
-                                placePiece(piece);
-                            }
-                            else
-                                return false;    //Friendly fire!
-                        }
+                        if (!isPiece(x, y))    //It's empty
+                            return move(piece, x, y);    //Move
+                        else if (enemyExists(piece, x, y))    //Target acquired!
+                            return kill(piece, x, y);    //Kills
+                        else
+                            return 0;    //Friendly fire!
                     }
                     else
-                        return false;
-                    break;
+                        return 0;
                 case 6: //King
                     if (kingPos(piece.x, piece.y, x, y))
                     {
                         if (!isPiece(x, y))    //It's empty
-                        {
-                            this[piece.x, piece.y] = null;    //Move
-                            piece.setDir(x, y);
-                            placePiece(piece);
-                        }
+                            return move(piece, x, y);    //Move
                         else if (enemyExists(piece, x, y))    //Target acquired!
-                        {
-                            piece.setDir(x, y);    //Kills
-                            placePiece(piece);
-                        }
+                            return kill(piece, x, y);    //Kills
                         else    //Friendly fire!
-                            return false;
+                            return 0;
                     }
                     else
-                        return false;
-                    break;
+                        return 0;
+                default:
+                    return 0;
             }
-            return true;
+        }
+
+        private int move(Piece piece, int x, int y)
+        {
+            try {
+                this[piece.x, piece.y] = null;
+                piece.setDir(x, y);
+                placePiece(piece);
+                return 1;
+            }
+            catch {
+                return 0;
+            }
+        }
+
+        private int kill(Piece piece, int x, int y)
+        {
+            try {
+                this[piece.x, piece.y] = null;
+                piece.setDir(x, y);
+                placePiece(piece);
+                return 2;
+            }
+            catch {
+                return 0;
+            }
         }
 
         private bool starterPawnPos(int x0, int y0, int x1, int y1)
@@ -473,12 +431,12 @@ namespace Tablero
 
         private bool horizontalPos(int x0, int y0, int x1, int y1)
         {
-            return x != x0 && y == y0;
+            return x0 != x1 && y0 == y1;
         }
 
         private bool verticalPos(int x0, int y0, int x1, int y1)
         {
-            return x == x0 && y != y0;
+            return x0 == x1 && y0 != y1;
         }
 
         private bool knightPos(int x0, int y0, int x1, int y1) //Verification for knight-victim position
@@ -507,15 +465,19 @@ namespace Tablero
             tab.printBoard();
             Chess c = new Chess();
             c.printBoard();
-            string ch = "p";
-            int i = (int)Enum.Parse(typeof(Pieces), ch);
+            string ch = "g";
+            ch = ch.ToUpper();
+            int i = (int)Enum.Parse(typeof(Letters), ch);
             Console.WriteLine(i);
-            if (c.algebraicNotation("2224"))
-                WriteLine("AAAAAAAAAAAAAAAA");
-            else
-                WriteLine("BBBBBBBBBBBBBBBB");
+            int a = 4;
+            char c1 = ((Pieces)a).ToString()[0];
+            WriteLine(c1);
+            string s = c.algebraicNotation("b2b4");
             c.printBoard();
-
+            WriteLine(s);
+            s = c.algebraicNotation("g4b4");
+            c.printBoard();
+            WriteLine(s);
         }
     }
 }
