@@ -510,7 +510,7 @@ namespace Tablero
             string ch = "p";
             int i = (int)Enum.Parse(typeof(Pieces), ch);
             Console.WriteLine(i);
-            if (c.algebraicNotation("2225"))
+            if (c.algebraicNotation("2224"))
                 WriteLine("AAAAAAAAAAAAAAAA");
             else
                 WriteLine("BBBBBBBBBBBBBBBB");

@@ -1,0 +1,15 @@
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.exe
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.deps.json
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.runtimeconfig.json
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.runtimeconfig.dev.json
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.dll
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\ref\Tablero.dll
+C:\Users\Guille\source\repos\Tablero\Tablero\bin\Debug\net5.0\Tablero.pdb
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.AssemblyInfoInputs.cache
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.AssemblyInfo.cs
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.csproj.CoreCompileInputs.cache
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.dll
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\ref\Tablero.dll
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.pdb
+C:\Users\Guille\source\repos\Tablero\Tablero\obj\Debug\net5.0\Tablero.genruntimeconfig.cache
