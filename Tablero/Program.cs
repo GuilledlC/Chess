@@ -36,8 +36,7 @@ namespace Tablero
 
     class Board
     {
-        protected int x, y;
-        protected bool turn = false; //White is true, black is false
+        protected int x, y, turn = 1;
         protected Piece[,] board;
 
         public Piece this[int x, int y]
@@ -68,7 +67,7 @@ namespace Tablero
         protected void printPiece(int x, int y)
         {
             if (!isPiece(x, y))
-                Write("__");
+                Write("  ");
             else
             {
                 Piece current = this[x, y];
@@ -194,15 +193,11 @@ namespace Tablero
 
             foreach (Piece b in black)
                     placePiece(b);
-
-            Piece aux = new Piece(2, 2, 7, 4);
-            placePiece(aux);
         }
 
         public int algebraicNotation(string expression)
         { //0 is retry, 1 is successful move, 2 is game end
             int x, y, letter, number;
-            expression.Replace(' ', '\0');
             try {
                 x = (int)Enum.Parse(typeof(Letters), expression[0].ToString().ToUpper());
                 y = Convert.ToInt32(expression[1].ToString());
@@ -210,13 +205,22 @@ namespace Tablero
                 number = Convert.ToInt32(expression[3].ToString());
             }
             catch {
+                printBoard();
                 WriteLine("ERROR: problem parsing instructions");
                 return 0;
             }
 
             if (!isPiece(x, y))
             {
+                printBoard();
                 WriteLine("ERROR: no piece");
+                return 0;
+            }
+
+            if(turn%2 != this[x, y].team%2)
+            {
+                printBoard();
+                WriteLine("ERROR: not your turn!");
                 return 0;
             }
 
@@ -229,6 +233,7 @@ namespace Tablero
             }
             else if (msg == 1)
             {
+                turn++;
                 string message = ((Pieces)this[letter, number].type).ToString();
                 message += (((Letters)letter).ToString()).ToLower();
                 message += number;
@@ -237,6 +242,7 @@ namespace Tablero
             }
             else if (msg == 2)
             {
+                turn++;
                 string message = ((Pieces)this[letter, number].type).ToString();
                 message += ":" + (((Letters)letter).ToString()).ToLower();
                 message += number;
@@ -494,17 +500,22 @@ namespace Tablero
             //tab.printBoard();
             Chess c = new Chess();
             c.printBoard();
-            string ch = "g";
+            /*string ch = "g";
             ch = ch.ToUpper();
             int i = (int)Enum.Parse(typeof(Letters), ch);
-            //Console.WriteLine(i);
             int a = 4;
             char c1 = ((Pieces)a).ToString()[0];
-            //WriteLine(c1);
             int s = c.algebraicNotation("b2b4");
             WriteLine(s);
             s = c.algebraicNotation("g4b4");
-            WriteLine(s);
+            WriteLine(s);*/
+            string expression;
+            do
+            {
+                expression = ReadLine();
+                Clear();
+            }
+            while (c.algebraicNotation(expression) != 2) ;
         }
     }
 }

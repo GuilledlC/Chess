@@ -1,0 +1,5 @@
+C:\Users\Guille\Documents\CODE\Tablero.exe
+C:\Users\Guille\Documents\CODE\Tablero.dll
+C:\Users\Guille\Documents\CODE\Tablero.deps.json
+C:\Users\Guille\Documents\CODE\Tablero.runtimeconfig.json
+C:\Users\Guille\Documents\CODE\Tablero.pdb
