@@ -37,6 +37,7 @@ namespace Tablero
     class Board
     {
         protected int x, y;
+        protected bool turn = false; //White is true, black is false
         protected Piece[,] board;
 
         public Piece this[int x, int y]
@@ -198,8 +199,8 @@ namespace Tablero
             placePiece(aux);
         }
 
-        public string algebraicNotation(string expression)
-        {
+        public int algebraicNotation(string expression)
+        { //0 is retry, 1 is successful move, 2 is game end
             int x, y, letter, number;
             expression.Replace(' ', '\0');
             try {
@@ -209,37 +210,58 @@ namespace Tablero
                 number = Convert.ToInt32(expression[3].ToString());
             }
             catch {
-                return "ERROR: problem parsing instructions";
+                WriteLine("ERROR: problem parsing instructions");
+                return 0;
             }
 
             if (!isPiece(x, y))
-                return "ERROR: no piece";
+            {
+                WriteLine("ERROR: no piece");
+                return 0;
+            }
 
             int msg = step(this[x, y], letter, number);
+            printBoard();
             if (msg == 0)
             {
-                return "ERROR: problem moving piece";
+                WriteLine("ERROR: problem moving piece");
+                return 0;
             }
             else if (msg == 1)
             {
                 string message = ((Pieces)this[letter, number].type).ToString();
                 message += (((Letters)letter).ToString()).ToLower();
                 message += number;
-                return message;
+                WriteLine(message);
+                return 1;
             }
             else if (msg == 2)
             {
                 string message = ((Pieces)this[letter, number].type).ToString();
                 message += ":" + (((Letters)letter).ToString()).ToLower();
                 message += number;
-                return message;
+                WriteLine(message);
+                return 1;
+            }
+            else if(msg == 3)
+            {
+                WriteLine("WHITE WINS!");
+                return 2;
+            }
+            else if(msg == 4)
+            {
+                WriteLine("BLACK WINS!");
+                return 2;
             }
             else
-                return "ERROR: unknown error";
+            {
+                WriteLine("ERROR: unknown error");
+                return 0;
+            }
         }
 
-        private int step(Piece piece, int x, int y) //0 is error, 1 is move, 2 is kill
-        {
+        private int step(Piece piece, int x, int y)
+        { //0 is error, 1 is move, 2 is kill, 3 white win, 4 black win
             if (!isInBounds(x, y))
                 return 0;
             switch(piece.type)
@@ -414,6 +436,13 @@ namespace Tablero
         private int kill(Piece piece, int x, int y)
         {
             try {
+                if(this[x, y].type == 6)
+                {
+                    if (this[x, y].team == 2)
+                        return 3;
+                    else
+                        return 4;
+                }    
                 this[piece.x, piece.y] = null;
                 piece.setDir(x, y);
                 placePiece(piece);
@@ -462,21 +491,19 @@ namespace Tablero
         {
             WriteLine("Hello World! {0}", (char)1);
             Board tab = new Board();
-            tab.printBoard();
+            //tab.printBoard();
             Chess c = new Chess();
             c.printBoard();
             string ch = "g";
             ch = ch.ToUpper();
             int i = (int)Enum.Parse(typeof(Letters), ch);
-            Console.WriteLine(i);
+            //Console.WriteLine(i);
             int a = 4;
             char c1 = ((Pieces)a).ToString()[0];
-            WriteLine(c1);
-            string s = c.algebraicNotation("b2b4");
-            c.printBoard();
+            //WriteLine(c1);
+            int s = c.algebraicNotation("b2b4");
             WriteLine(s);
             s = c.algebraicNotation("g4b4");
-            c.printBoard();
             WriteLine(s);
         }
     }
