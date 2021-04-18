@@ -273,7 +273,7 @@ namespace Tablero
             switch(piece.type)
             {
                 case 1: //Pawn
-                    if (y == piece.y + 1)    //Upwards
+                    if (pawnPos(piece.x, piece.y, x, y))    //Upwards
                     {
                         if (Math.Abs(x - piece.x) == 1)    //Diagonal
                         {
@@ -288,7 +288,6 @@ namespace Tablero
                                 return move(piece, x, y);    //Move
                             else
                                 return 0;
-                                
                         }
                         else
                             return 0;
@@ -320,7 +319,7 @@ namespace Tablero
                     else if (verticalPos(piece.x, piece.y, x, y))    //Vertical
                     {
                         int sum = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.y; i != y; i += sum)
+                        for (int i = piece.y + sum; i != y; i += sum)
                             if (isPiece(x, i))    //Blocking the path
                                 return 0;
 
@@ -350,8 +349,9 @@ namespace Tablero
                     {
                         int multx = (x - piece.x) / Math.Abs(x - piece.x);
                         int multy = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.x; i != x; i++)
-                            if (isPiece(multx*i, multy*i))    //Blocking the path
+                        int dist = Math.Abs(x - piece.x);
+                        for (int i = 1; i < dist; i++)
+                            if (isPiece(multx*i + piece.x, multy*i + piece.y))    //Blocking the path
                                     return 0;
 
                             if (!isPiece(x, y))    //It's empty
@@ -367,7 +367,7 @@ namespace Tablero
                     if (horizontalPos(piece.x, piece.y, x, y))    //Horizontal
                     {
                         int sum = (x - piece.x) / Math.Abs(x - piece.x);
-                        for (int i = piece.x; i != x; i += sum)
+                        for (int i = piece.x + sum; i != x; i += sum)
                             if (isPiece(i, y))    //Blocking the path
                                 return 0;
 
@@ -376,12 +376,12 @@ namespace Tablero
                         else if (enemyExists(piece, x, y))    //Target acquired!
                             return kill(piece, x, y);    //Kills
                         else
-                            return 0;    //Friendly fire!
+                            return 0;    //Friendly fire!                            
                     }
                     else if (verticalPos(piece.x, piece.y, x, y))    //Vertical
                     {
                         int sum = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.y; i != y; i += sum)
+                        for (int i = piece.y + sum; i != y; i += sum)
                             if (isPiece(x, i))    //Blocking the path
                                 return 0;
 
@@ -396,8 +396,9 @@ namespace Tablero
                     {
                         int multx = (x - piece.x) / Math.Abs(x - piece.x);
                         int multy = (y - piece.y) / Math.Abs(y - piece.y);
-                        for (int i = piece.x; i != x; i++)
-                            if (isPiece(multx * i, multy * i))    //Blocking the path
+                        int dist = Math.Abs(x - piece.x);
+                        for (int i = 1; i < dist; i++)
+                            if (isPiece(multx * i + piece.x, multy * i + piece.y))    //Blocking the path
                                 return 0;
 
                         if (!isPiece(x, y))    //It's empty
@@ -441,22 +442,36 @@ namespace Tablero
 
         private int kill(Piece piece, int x, int y)
         {
-            try {
-                if(this[x, y].type == 6)
-                {
-                    if (this[x, y].team == 2)
-                        return 3;
-                    else
-                        return 4;
-                }    
+            try {  
                 this[piece.x, piece.y] = null;
                 piece.setDir(x, y);
-                placePiece(piece);
-                return 2;
+                if (this[x, y].type == 6)
+                {  
+                    if (this[x, y].team == 2)
+                    {
+                        placePiece(piece);
+                        return 3;
+                    }
+                    else
+                    {
+                        placePiece(piece);
+                        return 4;
+                    } 
+                }
+                else
+                {
+                    placePiece(piece);
+                    return 2;
+                }
             }
             catch {
                 return 0;
             }
+        }
+
+        private bool pawnPos(int x0, int y0, int x1, int y1)
+        {
+            return (y1 - y0 == 1 && this[x0, y0].team == 1) || (y1 - y0 == -1 && this[x0, y0].team == 2);
         }
 
         private bool starterPawnPos(int x0, int y0, int x1, int y1)
@@ -486,8 +501,8 @@ namespace Tablero
 
         private bool kingPos(int x0, int y0, int x1, int y1)
         {
-            int dx = Math.Abs(x0 - x), dy = Math.Abs(y0 - y);
-            return dx < 2 && dy < 2 && (x != 0 || y != 0);
+            int dx = Math.Abs(x0 - x1), dy = Math.Abs(y0 - y1);
+            return dx < 2 && dy < 2 && (dx != 0 || dy != 0);
         }
     }
 
@@ -509,13 +524,17 @@ namespace Tablero
             WriteLine(s);
             s = c.algebraicNotation("g4b4");
             WriteLine(s);*/
-            string expression;
-            do
+            int a;
+            string expression = ReadLine();
+            Clear();
+            a = c.algebraicNotation(expression);
+            while(a != 2)
             {
+                WriteLine(a);
                 expression = ReadLine();
                 Clear();
+                a = c.algebraicNotation(expression);
             }
-            while (c.algebraicNotation(expression) != 2) ;
         }
     }
 }
