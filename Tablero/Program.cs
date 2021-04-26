@@ -19,7 +19,7 @@ namespace Tablero
     class Piece
     {
         public int type, team, x, y;
-        public bool moved;
+        public bool moved, promoted;
 
         public Piece(int type, int team, int x, int y)
         {
@@ -28,6 +28,7 @@ namespace Tablero
             this.x = x;
             this.y = y;
             moved = false;
+            promoted = false;
         }
 
         public void SetDir(int x, int y)
@@ -203,10 +204,18 @@ namespace Tablero
 
             foreach (Piece b in black)
                     PlacePiece(b);*/
-            Piece test1 = new Piece(1, 1, 5, 7);
-            Piece test2 = new Piece(1, 2, 5, 2);
+            Piece test1 = new Piece(6, 1, 5, 1);
+            Piece test2 = new Piece(2, 1, 1, 1);
+            Piece test3 = new Piece(2, 1, 8, 1);
+            Piece test4 = new Piece(6, 2, 5, 8);
+            Piece test5 = new Piece(2, 2, 1, 8);
+            Piece test6 = new Piece(2, 2, 8, 8);
             PlacePiece(test1);
             PlacePiece(test2);
+            PlacePiece(test3);
+            PlacePiece(test4);
+            PlacePiece(test5);
+            PlacePiece(test6);
         }
 
         public Outputs AlgebraicNotation(string expression)
@@ -281,6 +290,16 @@ namespace Tablero
                     message += ":" + (((Letters)letter).ToString()).ToLower();
                     message += number;
                     WriteLine(message);
+                    break;
+                case CastledLong:
+                    turn++;
+                    PrintBoard();
+                    WriteLine("O-O-O");
+                    break;
+                case CastledShort:
+                    turn++;
+                    PrintBoard();
+                    WriteLine("O-O");
                     break;
                 case BlackWon:
                     PrintBoard();
@@ -452,6 +471,41 @@ namespace Tablero
                         else    //Friendly fire!
                             return Blocked;
                     }
+                    else if(CastlingPos(piece.x, piece.y, x, y))
+                    {
+                        if (this[piece.x, piece.y].team == 1) //White
+                        {
+                            if (piece.x == 5 && x == 1)
+                            {
+                                Move(this[piece.x, piece.y], 2, 1);
+                                Move(this[x, y], 3, 1);
+                                return CastledLong;
+                            }
+                            else if ((piece.x == 5 && x == 8))
+                            {
+                                Move(this[piece.x, piece.y], 7, 1);
+                                Move(this[x, y], 6, 1);
+                                return CastledShort;
+                            }
+                            return IllegalMove;
+                        }
+                        else //Black
+                        {
+                            if (piece.x == 5 && x == 1)
+                            {
+                                Move(this[piece.x, piece.y], 2, 8);
+                                Move(this[x, y], 3, 8);
+                                return CastledLong;
+                            }
+                            else if ((piece.x == 5 && x == 8))
+                            {
+                                Move(this[piece.x, piece.y], 7, 8);
+                                Move(this[x, y], 6, 8);
+                                return CastledShort;
+                            }
+                            return IllegalMove;
+                        }
+                    }
                     else
                         return IllegalMove;
                 default:
@@ -513,9 +567,10 @@ namespace Tablero
                 try
                 {
                     c = ReadLine().ToCharArray()[0].ToString();
-                    if (/*c == Pieces.p.ToString() || */c == Pieces.K.ToString())
+                    if (c == Pieces.p.ToString() || c == Pieces.K.ToString())
                         continue;
                     p = new Piece((int)Enum.Parse(typeof(Pieces), c), this[x, y].team, x, y);
+                    this[x, y].promoted = true;
                     PlacePiece(p);
                     Clear();
                     break;
@@ -529,9 +584,23 @@ namespace Tablero
             return Promoted;
         }
 
+        private bool CastlingPos(int x0, int y0, int x1, int y1)
+        {
+            if (y0 == y1 && SameTeam(this[x0, y0], x1, y1) && this[x0, y0].type == 6 && this[x1, y1].type == 2 && !this[x0, y0].moved && !this[x1, y1].moved)
+            {
+                int sum = (x1 - x0) / Math.Abs(x1 - x0);
+                for (int i = x0 + sum; i != x1; i += sum)
+                    if (IsPiece(i, y1))    //Blocking the path
+                        return false;
+                return true;
+            }
+            else
+                return false;
+        }
+
         private bool CanPromote(int x, int y)
         {
-            return this[x, y].type == (int)Pieces.p && (this[x, y].team == (int)Teams.White && y == 8) || (this[x, y].team == (int)Teams.Black && y == 1);
+            return this[x, y].promoted == false && this[x, y].type == (int)Pieces.p && (this[x, y].team == (int)Teams.White && y == 8) || (this[x, y].team == (int)Teams.Black && y == 1);
         }
 
         private bool PawnPos(int x0, int y0, int x1, int y1)

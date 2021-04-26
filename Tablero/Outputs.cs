@@ -25,8 +25,9 @@ namespace Tablero
 		Moved = 5,
 		Killed = 6,
 		Promoted = 7,
-		Castled = 8,
-		BlackWon = 9,
-		WhiteWon = 10,		
+		CastledLong = 8,
+		CastledShort = 9,
+		BlackWon = 10,
+		WhiteWon = 11,		
     }
 }
