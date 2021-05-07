@@ -10,8 +10,6 @@ modification, are permitted provided that the following conditions are met:
 		THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 		OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
 
-using System;
-
 namespace Tablero
 {
 	enum Outputs
@@ -19,15 +17,16 @@ namespace Tablero
 		UnknownError = -1,
 		OutOfBounds = 0,
 		Blocked = 1,
-		IllegalMove = 2,
-		NoPiece = 3,
-		WrongTurn = 4,
-		Moved = 5,
-		Killed = 6,
-		Promoted = 7,
-		CastledLong = 8,
-		CastledShort = 9,
-		BlackWon = 10,
-		WhiteWon = 11,		
+		Checked = 2,
+		IllegalMove = 3,
+		NoPiece = 4,
+		WrongTurn = 5,
+		Moved = 6,
+		Killed = 7,
+		Promoted = 8,
+		CastledLong = 9,
+		CastledShort = 10,
+		BlackWon = 11,
+		WhiteWon = 12,		
     }
 }

@@ -12,15 +12,37 @@ modification, are permitted provided that the following conditions are met:
 
 namespace Tablero
 {
-    enum Letters
+    class Piece
     {
-        A = 1,
-        B = 2,
-        C = 3,
-        D = 4,
-        E = 5,
-        F = 6,
-        G = 7,
-        H = 8,
+        public int type, team, x, y;
+        public bool moved, promoted;
+
+        public Piece(int type, int team, int x, int y)
+        {
+            this.type = type;
+            this.team = team;
+            this.x = x;
+            this.y = y;
+            moved = false;
+            promoted = false;
+        }
+
+        public void SetDir(int x, int y)
+        {
+            this.x = x;
+            this.y = y;
+            moved = true;
+        }
+
+        public bool IsEnemy(in Piece piece)
+        {
+            return this.team != piece.team;
+        }
+
+        public void Promote(int type)
+        {
+            this.type = type;
+            promoted = true;
+        }
     }
 }
