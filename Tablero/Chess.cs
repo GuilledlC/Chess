@@ -19,8 +19,8 @@ namespace Tablero
 {
     class Chess : Board
     {
-        public List<Piece> whitePieces = new List<Piece>();
-        public List<Piece> blackPieces = new List<Piece>();
+        public List<Piece> whitePieces = new();
+        public List<Piece> blackPieces = new();
 
         public Chess()
         {
@@ -29,7 +29,7 @@ namespace Tablero
             this.board = new Piece[y, x];
             this.SetUp();
         }
-        public Piece test1;
+        
         public void SetUp()
         {
             Piece p1w = new(1, 1, 1, 2);
@@ -359,8 +359,8 @@ namespace Tablero
                         {
                             if (piece.x == 5 && x == 1) //Long
                             {
-                                Move(this[piece.x, piece.y], 2, 1);
-                                Move(this[x, y], 3, 1);
+                                Move(this[piece.x, piece.y], 3, 1);
+                                Move(this[x, y], 4, 1);
                                 return CastledLong;
                             }
                             else if ((piece.x == 5 && x == 8)) //Short
@@ -375,8 +375,8 @@ namespace Tablero
                         {
                             if (piece.x == 5 && x == 1) //Long
                             {
-                                Move(this[piece.x, piece.y], 2, 8);
-                                Move(this[x, y], 3, 8);
+                                Move(this[piece.x, piece.y], 3, 8);
+                                Move(this[x, y], 4, 8);
                                 return CastledLong;
                             }
                             else if ((piece.x == 5 && x == 8)) //Short
