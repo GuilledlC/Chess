@@ -125,7 +125,7 @@ namespace Tablero
             {
                 PrintBoard();
                 WriteLine("ERROR: problem parsing instructions");
-                return 0;
+                return UnknownError;
             }
 
             if (!IsPiece(x, y))
@@ -140,6 +140,22 @@ namespace Tablero
                 PrintBoard();
                 WriteLine("ERROR: not your turn!");
                 return WrongTurn;
+            }
+
+            int type = 1, team = 1;
+            bool moved, promoted;
+            Piece currentKing;
+            if (turn % 2 == 1)
+                currentKing = whitePieces.Find(x => x.type == (int)Pieces.K);
+            else
+                currentKing = blackPieces.Find(x => x.type == (int)Pieces.K);
+
+            if (Check(currentKing) && IsPiece(letter, number))
+            {
+                type = this[letter, number].type;
+                team = this[letter, number].team;
+                moved = this[letter, number].moved;
+                promoted = this[letter, number].promoted;
             }
 
             string message;
@@ -209,6 +225,24 @@ namespace Tablero
                     WriteLine("ERROR: problem moving piece");
                     break;
             }
+
+            if (Check(currentKing))
+            {
+                Move(this[letter, number], x, y);
+                if (output == Killed)
+                    this[letter, number] = new Piece(type, team, letter, number);
+                else if (output == Promoted)
+                    this[x, y].type = (int)Pieces.p;
+                else if (output == CastledShort)
+                    Move(this[6, y], 8, y);
+                else if (output == CastledLong)
+                    Move(this[4, y], 1, y);
+                turn--;
+                output = Checked;
+                Clear();
+                PrintBoard();
+            }
+
             return output;
         }
 
@@ -347,48 +381,19 @@ namespace Tablero
                     }
                     else if (CastlingPos(piece.x, piece.y, x, y))
                     {
-                        int multx = Math.Sign(x - piece.x);
-                        for (int i = piece.x + multx; i != x; i += multx)
-                            if (IsPiece(i, y))    //Blocking the path
-                                return Blocked;
-                        for (int i = piece.x; i != x; i += multx)
-                            if (Check(piece, i, piece.y))    //Checked
-                                return Checked;
-
-                        if (this[piece.x, piece.y].team == 1) //White
-                        {
-                            if (piece.x == 5 && x == 1) //Long
+                        if (piece.x == 5 && x == 1) //Long
                             {
-                                Move(this[piece.x, piece.y], 3, 1);
-                                Move(this[x, y], 4, 1);
+                                Move(this[piece.x, piece.y], 3, piece.y);
+                                Move(this[x, y], 4, piece.y);
                                 return CastledLong;
                             }
-                            else if ((piece.x == 5 && x == 8)) //Short
-                            {
-                                Move(this[piece.x, piece.y], 7, 1);
-                                Move(this[x, y], 6, 1);
-                                return CastledShort;
-                            }
-                            return IllegalMove;
-                        }
-                        else if (this[piece.x, piece.y].team == 2) //Black
+                        else if ((piece.x == 5 && x == 8)) //Short
                         {
-                            if (piece.x == 5 && x == 1) //Long
-                            {
-                                Move(this[piece.x, piece.y], 3, 8);
-                                Move(this[x, y], 4, 8);
-                                return CastledLong;
-                            }
-                            else if ((piece.x == 5 && x == 8)) //Short
-                            {
-                                Move(this[piece.x, piece.y], 7, 8);
-                                Move(this[x, y], 6, 8);
-                                return CastledShort;
-                            }
-                            return IllegalMove;
+                            Move(this[piece.x, piece.y], 7, piece.y);
+                            Move(this[x, y], 6, piece.y);
+                            return CastledShort;
                         }
-                        else
-                            return IllegalMove;
+                        return IllegalMove;
                     }
                     else
                         return IllegalMove;
@@ -478,9 +483,77 @@ namespace Tablero
                 return whitePieces;
         }
 
-        private bool Check(Piece piece, int x, int y)
+        private bool Check(int x, int y)
         {
-            List<Piece> enemyPieces = Enemies(piece);
+            List<Piece> enemyPieces = Enemies(this[x, y]);
+            foreach (Piece p in enemyPieces)
+            {
+                switch (p.type)
+                {
+                    case 1:
+                        if (PawnKill(p.x, p.y, x, y))
+                            return true;
+                        break;
+                    case 2:
+                        if (HorizontalPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'H'))
+                                return false;
+                            return true;
+                        }
+                        else if (VerticalPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'V'))
+                                return false;
+                            return true;
+                        }
+                        break;
+                    case 3:
+                        if (KnightPos(p.x, p.y, x, y))
+                            return true;
+                        break;
+                    case 4:
+                        if (BishopPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'D'))
+                                return false;
+                            return true;
+                        }
+                        break;
+                    case 5:
+                        if (HorizontalPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'H'))
+                                return false;
+                            return true;
+                        }
+                        else if (VerticalPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'V'))
+                                return false;
+                            return true;
+                        }
+                        else if (BishopPos(p.x, p.y, x, y))
+                        {
+                            if (BlockingPath(p.x, p.y, x, y, 'D'))
+                                return false;
+                            return true;
+                        }
+                        break;
+                    case 6:
+                        if (KingPos(p.x, p.y, x, y))
+                            return true;
+                        break;
+                }
+            }
+            return false;
+        }
+
+        private bool Check(Piece piece)
+        {
+            int x = piece.x;
+            int y = piece.y;
+            List<Piece> enemyPieces = Enemies(this[x, y]);
             foreach (Piece p in enemyPieces)
             {
                 switch (p.type)
@@ -576,7 +649,7 @@ namespace Tablero
 
         private bool CastlingPos(int x0, int y0, int x1, int y1)
         {
-            if (IsPiece(x1, y1) && y0 == y1 && !this[x0, y0].IsEnemy(this[x1, y1]) && this[x0, y0].type == 6 && this[x1, y1].type == 2 && !this[x0, y0].moved && !this[x1, y1].moved)
+            if (IsPiece(x0, y0) && IsPiece(x1, y1) && this[x0, y0].type == (int)Pieces.K && this[x1, y1].type == (int)Pieces.R && !this[x0, y0].IsEnemy(this[x1, y1]) && !this[x0, y0].moved && !this[x1, y1].moved && !Check(x0, y0) && !BlockingPath(x0, y0, x1, y1, 'H'))
                 return true;
             else
                 return false;
