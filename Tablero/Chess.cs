@@ -144,11 +144,17 @@ namespace Tablero
 
             int type = 1, team = 1;
             bool moved, promoted;
+            List<Piece> currentTeam;
             Piece currentKing;
             if (turn % 2 == 1)
-                currentKing = whitePieces.Find(x => x.type == (int)Pieces.K);
+                currentTeam = whitePieces;
             else
-                currentKing = blackPieces.Find(x => x.type == (int)Pieces.K);
+                currentTeam = blackPieces;
+
+            currentKing = currentTeam.Find(x => x.type == (int)Pieces.K);
+            foreach (Piece p in currentTeam)
+                if (p.passantVictim)
+                    p.passantVictim = false;
 
             if (Check(currentKing) && IsPiece(letter, number))
             {
@@ -264,13 +270,21 @@ namespace Tablero
                     {
                         if (EnemyExists(piece, x, y))    //Can kill
                             return Kill(piece, x, y);    //Kills
+                        else if (PassantExists(piece.team, x, y))    //En Passant
+                        {
+                            Move(this[x, y + (piece.team == 1?-1:1)], x, y);
+                            return Kill(piece, x, y);
+                        }
                         else
                             return IllegalMove;
                     }
                     else if (StarterPawnPos(piece.x, piece.y, x, y))
                     {
                         if (!IsPiece(x, y))    //It's empty
+                        {
+                            piece.passantVictim = true;
                             return Move(piece, x, y);    //Move
+                        }
                         else
                             return Blocked;
                     }
@@ -668,6 +682,11 @@ namespace Tablero
         private bool PawnKill(int x0, int y0, int x1, int y1)
         {
             return Math.Abs(x0 - x1) == 1 && ((y1 - y0 == 1 && this[x0, y0].team == (int)Teams.White) || (y1 - y0 == -1 && this[x0, y0].team == (int)Teams.Black));
+        }
+
+        private bool PassantExists(int team, int x, int y)
+        {
+            return (team == 1 && y == 6 && IsPiece(x, y - 1) && this[x, y - 1].team != team && this[x, y -1].passantVictim) || (team == 2 && y == 3 && IsPiece(x, y + 1) && this[x, y + 1].team != team && this[x, y + 1].passantVictim);
         }
 
         private static bool StarterPawnPos(int x0, int y0, int x1, int y1)

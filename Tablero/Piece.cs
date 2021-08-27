@@ -15,7 +15,7 @@ namespace Tablero
     class Piece
     {
         public int type, team, x, y;
-        public bool moved, promoted;
+        public bool moved, promoted, passantVictim = false;
 
         public Piece(int type, int team, int x, int y)
         {
