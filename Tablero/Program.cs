@@ -12,6 +12,8 @@ modification, are permitted provided that the following conditions are met:
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using static System.Console; //Very useful!
 using static Tablero.Outputs;
 
@@ -21,11 +23,8 @@ namespace Tablero
     {
         static void Main(string[] args)
         {
-            WriteLine("Hello World! {0}", (char)1);
-            Board tab = new Board();
+            //Board tab = new Board();
             //tab.printBoard();
-            Chess c = new Chess();
-            c.PrintBoard();
             /*string ch = "g";
             ch = ch.ToUpper();
             int i = (int)Enum.Parse(typeof(Letters), ch);
@@ -34,22 +33,28 @@ namespace Tablero
             int s = c.algebraicNotation("b2b4");
             WriteLine(s);
             s = c.algebraicNotation("g4b4");
-            WriteLine(s);*/
+            WriteLine(s);
 
-            
-
-            Outputs output;
-            string expression = ReadLine();
-            Clear();
-            output = c.AlgebraicNotation(expression);
-            while(output != WhiteWon || output != BlackWon)
+            string path = "Save.txt";
+            if(!File.Exists(path))
             {
-                WriteLine(output);
-                expression = ReadLine();
-                Clear();
-                output = c.AlgebraicNotation(expression);
+                File.WriteAllText(path, "Statistics\n\nWhite Wins: 0(0.0 %)\nBlack Wins: 0(0.0 %)\nDraws:      0(0.0 %)\n\n\nMost wins:\n\n1.Name - Score");
             }
-            ReadLine();
+
+
+            List<string> save = File.ReadAllLines(path).ToList();
+            string whiteScore = save[2];
+            string blackScore = save[3];    
+            string drawScore = save[4];
+            int ws = Int32.Parse(whiteScore.Substring(12, whiteScore.IndexOf('(') - 12));
+            int bs = Int32.Parse(blackScore.Substring(12, blackScore.IndexOf('(') - 12));
+            int ds = Int32.Parse(drawScore.Substring(12, drawScore.IndexOf('(') - 12));
+            Console.WriteLine("{0} {1} {2}", ws, bs, ds);
+            List<string> mostWins = new List<string>();
+            mostWins.AddRange(save.GetRange(9, save.Count - 9));*/
+
+            Game game = new Game();
+            game.GameLoop();
         }
     }
 }

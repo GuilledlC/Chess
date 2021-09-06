@@ -15,7 +15,7 @@ namespace Tablero
     class Piece
     {
         public int type, team, x, y;
-        public bool moved, promoted, passantVictim = false;
+        public bool moved = false, promoted = false, passantVictim = false;
 
         public Piece(int type, int team, int x, int y)
         {
@@ -23,8 +23,6 @@ namespace Tablero
             this.team = team;
             this.x = x;
             this.y = y;
-            moved = false;
-            promoted = false;
         }
 
         public void SetDir(int x, int y)

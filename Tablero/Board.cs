@@ -60,7 +60,7 @@ namespace Tablero
             }
         }
 
-        public void PrintBoard()
+        public void PrintBoard(bool showTurn = true)
         {
             ConsoleColor dblue = ConsoleColor.DarkBlue;
             ConsoleColor cyan = ConsoleColor.Cyan;
@@ -70,7 +70,8 @@ namespace Tablero
             BackgroundColor = black;
             ForegroundColor = white;
 
-            WriteLine("\n    {0} TURN", ((Teams)(turn % 2 == 0 ? 2 : 1)).ToString());
+            if(showTurn)
+                WriteLine("\n    {0} TURN", ((Teams)(turn % 2 == 0 ? 2 : 1)).ToString());
             Write("  ");
             for (int i = 0; i < x; i++)
                 Write("{0} ", (Letters)i + 1);

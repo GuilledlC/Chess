@@ -27,6 +27,7 @@ namespace Tablero
 		CastledLong = 9,
 		CastledShort = 10,
 		BlackWon = 11,
-		WhiteWon = 12,		
+		WhiteWon = 12,
+		Stalemate = 13,
     }
 }

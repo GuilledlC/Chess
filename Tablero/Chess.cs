@@ -113,6 +113,11 @@ namespace Tablero
 
         public Outputs AlgebraicNotation(string expression)
         { //0 is retry, 1 is successful move, 2 is game end
+            if (expression.ToUpper() == "WW")
+                return WhiteWon;
+            else if (expression.ToUpper() == "BW")
+                return BlackWon;
+
             int x, y, letter, number;
             try
             {
@@ -473,7 +478,7 @@ namespace Tablero
                 string c;
                 try
                 {
-                    c = ReadLine().ToCharArray()[0].ToString();
+                    c = ReadLine().ToCharArray()[0].ToString().ToUpper();
                     if (c == Pieces.p.ToString() || c == Pieces.K.ToString())
                         continue;
                     this[x, y].Promote((int)Enum.Parse(typeof(Pieces), c));
